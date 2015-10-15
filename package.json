@@ -1,0 +1,23 @@
+{
+  "name": "flux-form",
+  "version": "1.0.0",
+  "description": "Manage your forms with flux, any flux",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:goatslacker/flux-form.git"
+  },
+  "keywords": [
+    "flux",
+    "form"
+  ],
+  "author": "Josh Perez <josh@goatslacker.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/goatslacker/flux-form/issues"
+  },
+  "homepage": "https://github.com/goatslacker/flux-form"
+}
