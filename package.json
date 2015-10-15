@@ -2,9 +2,9 @@
   "name": "flux-form",
   "version": "1.0.0",
   "description": "Manage your forms with flux, any flux",
-  "main": "index.js",
+  "main": "lib/fluxForm.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel src --out-dir lib"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/goatslacker/flux-form/issues"
   },
-  "homepage": "https://github.com/goatslacker/flux-form"
+  "homepage": "https://github.com/goatslacker/flux-form",
+  "devDependencies": {
+    "babel": "5.8.23"
+  }
 }
