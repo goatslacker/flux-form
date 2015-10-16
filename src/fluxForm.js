@@ -36,7 +36,7 @@ export const getActionCreators = (namespace) => {
 }
 
 export default (namespace, dispatcher, opts) => {
-  const { fields, state, validators } = opts
+  const { fields, state, validators, output } = opts
 
   // get the action creators
   const { changed, saved, canceled, failed } = getActionCreators(namespace)
@@ -64,7 +64,7 @@ export default (namespace, dispatcher, opts) => {
   }
   const cancel = () => dispatcher.dispatch(canceled.dispatch(state))
   const change = (key, val) => {
-    state[key] = val
+    state[key] = output[key] ? output[key](val) : val
     dispatcher.dispatch(changed.dispatch(state))
   }
 
