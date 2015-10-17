@@ -1,37 +1,29 @@
-const fsa = (type, payload) => {
+const createAction = (namespace, name) => {
+  const type = `${namespace}/${name}`
   return {
-    // FSA
-    type,
-    payload,
-    // Alt
-    action: type,
-    data: payload,
+    id: type,
+    dispatch(payload) {
+      const id = Math.random().toString(18).substr(2, 16)
+
+      return {
+        type,
+        payload,
+        meta: {
+          id,
+          namespace,
+          name,
+        },
+      }
+    },
   }
 }
 
 export const getActionCreators = (namespace) => {
-  const saveId = `${namespace}/saved`
-  const cancelId = `${namespace}/canceled`
-  const changeId = `${namespace}/changed`
-  const failId = `${namespace}/failed`
-
   return {
-    saved: {
-      id: saveId,
-      dispatch: data => fsa(saveId, data),
-    },
-    canceled: {
-      id: cancelId,
-      dispatch: data => fsa(cancelId, data),
-    },
-    changed: {
-      id: changeId,
-      dispatch: data => fsa(changeId, data),
-    },
-    failed: {
-      id: failId,
-      dispatch: data => fsa(failId, data),
-    },
+    saved: createAction(namespace, 'saved'),
+    canceled: createAction(namespace, 'canceled'),
+    changed: createAction(namespace, 'changed'),
+    failed: createAction(namespace, 'failed'),
   }
 }
 
