@@ -26,6 +26,8 @@ export const getActionCreators = (namespace) => {
     canceled: createAction(namespace, 'canceled'),
     changed: createAction(namespace, 'changed'),
     failed: createAction(namespace, 'failed'),
+    focused: createAction(namespace, 'focused'),
+    blurred: createAction(namespace, 'blurred'),
   }
 }
 
@@ -38,7 +40,14 @@ export default (namespace, dispatcher, opts) => {
   } = opts
 
   // get the action creators
-  const { changed, saved, canceled, failed } = getActionCreators(namespace)
+  const {
+    changed,
+    saved,
+    canceled,
+    failed,
+    focused,
+    blurred,
+  } = getActionCreators(namespace)
 
   const validate = (callback) => {
     const results = Object.keys(validators).map((key) => {
@@ -91,6 +100,10 @@ export default (namespace, dispatcher, opts) => {
 
   const cancel = () => dispatcher.dispatch(canceled.dispatch(state))
 
+  const focus = key => dispatcher.dispatch(focused.dispatch(key))
+
+  const blur = key => dispatcher.dispatch(blurred.dispatch(key))
+
   const change = (key, val) => {
     state[key] = val
     dispatcher.dispatch(changed.dispatch(state))
@@ -102,12 +115,24 @@ export default (namespace, dispatcher, opts) => {
     if (target.dataset.fluxKey) change(target.dataset.fluxKey, target.value)
   }
 
+  const onFocus = (ev) => {
+    const target = ev.target
+    if (target.dataset.fluxKey) focus(target.dataset.fluxKey)
+  }
+
+  const onBlur = (ev) => {
+    const target = ev.target
+    if (target.dataset.fluxKey) blur(target.dataset.fluxKey)
+  }
+
   // the fields as props
   const props = fields.reduce((all, field) => {
     all[field] = {
       value: state[field],
       'data-flux-key': field,
       onChange,
+      onFocus,
+      onBlur,
     }
     return all
   }, {})
@@ -116,6 +141,8 @@ export default (namespace, dispatcher, opts) => {
     props,
     save,
     cancel,
+    focus,
+    blur,
     validate,
     normalize,
     change,
