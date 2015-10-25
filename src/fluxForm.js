@@ -1,3 +1,5 @@
+import isPromise from 'is-promise'
+
 const createAction = (namespace, name) => {
   const type = `${namespace}/${name}`
   return {
@@ -28,35 +30,69 @@ export const getActionCreators = (namespace) => {
 }
 
 export default (namespace, dispatcher, opts) => {
-  const { fields, state, validators, output } = opts
+  const {
+    fields = [],
+    state = {},
+    validators = {},
+    output = {},
+  } = opts
 
   // get the action creators
   const { changed, saved, canceled, failed } = getActionCreators(namespace)
 
-  // build action dispatchers
-  const save = (callback) => {
-    const invalidState = Object.keys(validators).reduce((x, key) => {
+  const validate = (callback) => {
+    const results = Object.keys(validators).map((key) => {
       try {
-        validators[key](state[key])
-      } catch (e) {
-        x[key] = e.message
+        const value = validators[key](state[key])
+        return isPromise(value)
+          ? value.then((value) => ({ key, value }), err => ({ key, err }))
+          : Promise.resolve({ key, value })
+      } catch (err) {
+        return Promise.resolve({ key, err })
       }
-      return x
-    }, {})
+    })
 
-    const isValid = !Object.keys(invalidState).length
+    return Promise.all(results).then((result) => {
+      const hasErrors = result.some(({ err }) => !!err)
+      const values = result.reduce((o, { key, value, err }) => {
+        o[key] = err ? err : value
+        return o
+      }, {})
 
-    if (isValid) {
-      dispatcher.dispatch(saved.dispatch(state));
-    } else {
-      dispatcher.dispatch(failed.dispatch(invalidState));
-    }
-
-    if (callback) callback(isValid, state)
+      if (hasErrors) {
+        if (callback) callback(values)
+        return Promise.reject(values)
+      } else {
+        if (callback) callback(null, values)
+        return values
+      }
+    })
   }
+
+  const normalize = () => {
+    Object.keys(state).forEach((key) => {
+      const val = state[key]
+      state[key] = output[key] ? output[key](val) : val
+    })
+  }
+
+  const save = (callback) => {
+    normalize()
+    return validate().then(() => {
+      dispatcher.dispatch(saved.dispatch(state));
+      if (callback) callback(null, state)
+      return state
+    }, (err) => {
+      dispatcher.dispatch(failed.dispatch(err));
+      if (callback) callback(err)
+      return Promise.reject(err)
+    })
+  }
+
   const cancel = () => dispatcher.dispatch(canceled.dispatch(state))
+
   const change = (key, val) => {
-    state[key] = output[key] ? output[key](val) : val
+    state[key] = val
     dispatcher.dispatch(changed.dispatch(state))
   }
 
@@ -77,6 +113,12 @@ export default (namespace, dispatcher, opts) => {
   }, {})
 
   return {
-    form: { props, save, cancel, change, state }
+    props,
+    save,
+    cancel,
+    validate,
+    normalize,
+    change,
+    state,
   }
 }
