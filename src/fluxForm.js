@@ -1,34 +1,15 @@
 import isPromise from 'is-promise'
-
-const createAction = (namespace, name) => {
-  const type = `${namespace}/${name}`
-  return {
-    id: type,
-    dispatch(payload) {
-      const id = Math.random().toString(18).substr(2, 16)
-
-      return {
-        type,
-        payload,
-        meta: {
-          id,
-          namespace,
-          name,
-        },
-      }
-    },
-  }
-}
+import { generateActions } from 'create-actions'
 
 export const getActionCreators = (namespace) => {
-  return {
-    saved: createAction(namespace, 'saved'),
-    canceled: createAction(namespace, 'canceled'),
-    changed: createAction(namespace, 'changed'),
-    failed: createAction(namespace, 'failed'),
-    focused: createAction(namespace, 'focused'),
-    blurred: createAction(namespace, 'blurred'),
-  }
+  return generateActions(namespace, [
+    'saved',
+    'canceled',
+    'changed',
+    'failed',
+    'focused',
+    'blurred',
+  ])
 }
 
 export default (namespace, dispatcher, opts) => {
@@ -88,25 +69,25 @@ export default (namespace, dispatcher, opts) => {
   const save = (callback) => {
     normalize()
     return validate().then(() => {
-      dispatcher.dispatch(saved.dispatch(state));
+      dispatcher.dispatch(saved(state));
       if (callback) callback(null, state)
       return state
     }, (err) => {
-      dispatcher.dispatch(failed.dispatch(err));
+      dispatcher.dispatch(failed(err));
       if (callback) callback(err)
       return Promise.reject(err)
     })
   }
 
-  const cancel = () => dispatcher.dispatch(canceled.dispatch(state))
+  const cancel = () => dispatcher.dispatch(canceled(state))
 
-  const focus = key => dispatcher.dispatch(focused.dispatch(key))
+  const focus = key => dispatcher.dispatch(focused(key))
 
-  const blur = key => dispatcher.dispatch(blurred.dispatch(key))
+  const blur = key => dispatcher.dispatch(blurred(key))
 
   const change = (key, val) => {
     state[key] = val
-    dispatcher.dispatch(changed.dispatch(state))
+    dispatcher.dispatch(changed(state))
   }
 
   // the onChange handler for fields
