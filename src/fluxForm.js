@@ -30,8 +30,8 @@ export default (namespace, dispatcher, opts) => {
     blurred,
   } = getActionCreators(namespace)
 
-  const validate = (callback) => {
-    const results = Object.keys(validators).map((key) => {
+  const validate = (callback, toValidate = validators) => {
+    const results = Object.keys(toValidate).map((key) => {
       try {
         const value = validators[key](state[key])
         return isPromise(value)
