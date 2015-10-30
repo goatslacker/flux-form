@@ -1,6 +1,6 @@
 {
   "name": "flux-form",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Manage your forms with flux, any flux",
   "main": "lib/fluxForm.js",
   "scripts": {
