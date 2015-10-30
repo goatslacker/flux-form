@@ -6,7 +6,7 @@ export const getActionCreators = (namespace) => {
     'saved',
     'canceled',
     'changed',
-    'failed',
+    'validationFailed',
     'focused',
     'blurred',
   ])
@@ -25,7 +25,7 @@ export default (namespace, dispatcher, opts) => {
     changed,
     saved,
     canceled,
-    failed,
+    validationFailed,
     focused,
     blurred,
   } = getActionCreators(namespace)
@@ -51,6 +51,7 @@ export default (namespace, dispatcher, opts) => {
 
       if (hasErrors) {
         if (callback) callback(values)
+        dispatcher.dispatch(validationFailed(values))
         return Promise.reject(values)
       } else {
         if (callback) callback(null, values)
@@ -73,7 +74,6 @@ export default (namespace, dispatcher, opts) => {
       if (callback) callback(null, state)
       return state
     }, (err) => {
-      dispatcher.dispatch(failed(err));
       if (callback) callback(err)
       return Promise.reject(err)
     })
@@ -93,17 +93,26 @@ export default (namespace, dispatcher, opts) => {
   // the onChange handler for fields
   const onChange = (ev) => {
     const target = ev.target
-    if (target.dataset.fluxKey) change(target.dataset.fluxKey, target.value)
+    if (target.dataset.fluxKey) {
+      change(target.dataset.fluxKey, target.value)
+      if (opts.onChange) opts.onChange(target.dataset.fluxKey, target.value)
+    }
   }
 
   const onFocus = (ev) => {
     const target = ev.target
-    if (target.dataset.fluxKey) focus(target.dataset.fluxKey)
+    if (target.dataset.fluxKey) {
+      focus(target.dataset.fluxKey)
+      if (opts.onFocus) opts.onFocus(target.dataset.fluxKey)
+    }
   }
 
   const onBlur = (ev) => {
     const target = ev.target
-    if (target.dataset.fluxKey) blur(target.dataset.fluxKey)
+    if (target.dataset.fluxKey) {
+      blur(target.dataset.fluxKey)
+      if (opts.onBlur) opts.onBlur(target.dataset.fluxKey)
+    }
   }
 
   // the fields as props
