@@ -131,8 +131,6 @@ export default (namespace, dispatcher, opts) => {
     props,
     save,
     cancel,
-    focus,
-    blur,
     validate,
     normalize,
     change,
