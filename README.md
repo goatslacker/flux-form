@@ -146,7 +146,27 @@ form.normalize()
 focus and blur actions are called whenever an element receives focus or is
 blurred.
 
-## Actions
+## Saving
+
+In order to save your form state which will trigger validation and normalization you can
+call save on your form object.
+
+```js
+const form = fluxForm('MyForm', dispatcher, {
+  fields: [
+    'address',
+    'city',
+    'country',
+  ],
+})
+
+form.save().then((state) => {
+})
+```
+
+Save returns a promise but you can also pass it a node-style callback.
+
+## Action Creators
 
 Flux form works by firing off flux actions with the dispatcher you've provided.
 The actions are dispatched in [FSA format](https://github.com/acdlite/flux-standard-action).
