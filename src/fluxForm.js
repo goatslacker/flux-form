@@ -33,7 +33,10 @@ export default (namespace, dispatcher, opts) => {
   const validate = (callback, toValidate = validators) => {
     const results = Object.keys(toValidate).map((key) => {
       try {
-        const value = validators[key](state[key])
+        const value = validators[key]
+          ? validators[key](state[key])
+          : Promise.resolve()
+
         return isPromise(value)
           ? value.then((value) => ({ key, value }), err => ({ key, err }))
           : Promise.resolve({ key, value })
