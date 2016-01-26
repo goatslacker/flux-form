@@ -14,9 +14,8 @@ export const getActionCreators = (namespace) => {
 
 export default (namespace, dispatcher, opts) => {
   const {
-    fields = [],
+    propTypes = {},
     state = {},
-    validators = {},
     output = {},
   } = opts
 
@@ -30,16 +29,16 @@ export default (namespace, dispatcher, opts) => {
     blurred,
   } = getActionCreators(namespace)
 
-  const validate = (callback, toValidate = validators) => {
+  const validate = (callback, toValidate = propTypes) => {
     const results = Object.keys(toValidate).map((key) => {
       try {
-        const value = validators[key]
-          ? validators[key](state[key])
+        const value = toValidate[key]
+          ? toValidate[key](state, key, namespace, 'prop', key)
           : Promise.resolve()
 
         return isPromise(value)
           ? value.then((value) => ({ key, value }), err => ({ key, err }))
-          : Promise.resolve({ key, value })
+          : Promise.resolve({ key, value: state[key] })
       } catch (err) {
         return Promise.resolve({ key, err })
       }
@@ -93,7 +92,7 @@ export default (namespace, dispatcher, opts) => {
     dispatcher.dispatch(changed(state))
   }
 
-  // the onChange handler for fields
+  // the onChange handler for prop
   const onChange = (ev) => {
     const target = ev.target
     if (target.dataset.fluxKey) {
@@ -118,11 +117,13 @@ export default (namespace, dispatcher, opts) => {
     }
   }
 
-  // the fields as props
-  const props = fields.reduce((all, field) => {
-    all[field] = {
-      value: state[field],
-      'data-flux-key': field,
+  const props = Object.keys(propTypes).reduce((all, prop) => {
+    // send down some default props for your component
+    // if your value is a shape or an array then you can manually decide
+    // what you want to do with it
+    all[prop] = {
+      value: state[prop],
+      'data-flux-key': prop,
       onChange,
       onFocus,
       onBlur,
