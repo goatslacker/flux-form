@@ -36,6 +36,10 @@ export default (namespace, dispatcher, opts) => {
           ? toValidate[key](state, key, namespace, 'prop', key)
           : Promise.resolve()
 
+        if (value instanceof Error) {
+          throw value;
+        }
+
         return isPromise(value)
           ? value.then((value) => ({ key, value }), err => ({ key, err }))
           : Promise.resolve({ key, value: state[key] })
@@ -118,16 +122,12 @@ export default (namespace, dispatcher, opts) => {
   }
 
   const props = Object.keys(propTypes).reduce((all, prop) => {
-    // send down some default props for your component
-    // if your value is a shape or an array then you can manually decide
-    // what you want to do with it
-    all[prop] = {
-      value: state[prop],
-      'data-flux-key': prop,
-      onChange,
-      onFocus,
-      onBlur,
-    }
+    const value = state[prop]
+
+    all[prop] = typeof value === 'object'
+      ? { 'data-flux-key': prop, onFocus, onBlur }
+      : { 'data-flux-key': prop, value, onChange, onFocus, onBlur }
+
     return all
   }, {})
 
