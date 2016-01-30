@@ -17,6 +17,9 @@ export default (namespace, dispatcher, opts) => {
     propTypes = {},
     state = {},
     output = {},
+    onValidate,
+    onSave,
+    onNormalize,
   } = opts
 
   // get the action creators
@@ -30,6 +33,8 @@ export default (namespace, dispatcher, opts) => {
   } = getActionCreators(namespace)
 
   const validate = (callback, toValidate = propTypes) => {
+    if (onValidate) return onValidate(state, toValidate)
+
     const results = Object.keys(toValidate).map((key) => {
       try {
         const value = toValidate[key]
@@ -67,6 +72,8 @@ export default (namespace, dispatcher, opts) => {
   }
 
   const normalize = () => {
+    if (onNormalize) return onNormalize()
+
     Object.keys(state).forEach((key) => {
       const val = state[key]
       state[key] = output[key] ? output[key](val) : val
@@ -74,6 +81,8 @@ export default (namespace, dispatcher, opts) => {
   }
 
   const save = (callback) => {
+    if (onSave) return onSave(state)
+
     normalize()
     return validate().then(() => {
       dispatcher.dispatch(saved(state));
