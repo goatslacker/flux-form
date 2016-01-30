@@ -5,14 +5,15 @@ Flux form is a helper for managing forms with flux
 ```js
 import fluxForm from 'flux-form'
 import { Dispatcher } from 'flux'
+import React from 'react'
 
 const dispatcher = new Dispatcher()
 
 const form = fluxForm('MyForm', dispatcher, {
-  fields: [
-    'name',
-    'email',
-  ],
+  propTypes: {
+    name: React.PropTypes.string.isRequired,
+    email: React.PropTypes.string.isRequired,
+  },
 
   state: UserStore.getState(),
 })
@@ -60,18 +61,14 @@ automatically whenever the form is saved.
 
 ```js
 const form = fluxForm('MyForm', dispatcher, {
-  fields: [
-    'username',
-    'password',
-  ],
-
-  validators: {
+  propTypes: {
     // you can asynchronously validate a field by returning a promise
     // for example, you can validate that the username is not taken here
     // by making an API call and rejecting the Promise
-    username(data) {
+    username(state, key) {
+      const name = state[key]
       return new Promise((resolve, reject) {
-        xhr.post('/validateUsername', { user: data }, (res) => {
+        xhr.post('/validateUsername', { user: name }, (res) => {
           if (res.statusCode === 200) {
             resolve()
           } else {
@@ -82,8 +79,9 @@ const form = fluxForm('MyForm', dispatcher, {
     },
 
     // you throw an error if it does not pass validation
-    password(data) {
-      if (data.length <= 6) {
+    password(state, key) {
+      const pwd = state[key]
+      if (pwd.length <= 6) {
         throw new Error('Password must be longer than 6 characters')
       }
     },
@@ -120,9 +118,9 @@ Form fields are normalized either manually or automatically when saving.
 
 ```js
 const form = fluxForm('MyForm', dispatcher, {
-  fields: [
-    'phone',
-  ],
+  propTypes: {
+    phone: React.propTypes.string,
+  },
 
   output: {
     // some really crappy normalization lol
@@ -153,11 +151,11 @@ call save on your form object.
 
 ```js
 const form = fluxForm('MyForm', dispatcher, {
-  fields: [
-    'address',
-    'city',
-    'country',
-  ],
+  propTypes: {
+    address: React.PropTypes.string,
+    city: React.PropTypes.string,
+    country: React.PropTypes.string,
+  },
 })
 
 form.save().then((state) => {
