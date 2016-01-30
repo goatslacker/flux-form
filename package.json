@@ -5,7 +5,8 @@
   "main": "lib/fluxForm.js",
   "scripts": {
     "build": "babel src --out-dir lib",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "babel-node test"
   },
   "repository": {
     "type": "git",
